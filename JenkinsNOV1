@@ -1,0 +1,60 @@
+pipeline{
+
+agent any;
+
+tools{
+maven 'maven3.6.3'
+}
+
+stages{
+
+  stage('CheckoutCode'){
+    steps{  
+    git branch: 'development', credentialsId: 'bc24a5fc-5bfc-49fd-8240-82695e50796f', url: 'https://github.com/sreedhark9/maven-web-application.git'
+  }
+  }
+  
+  stage('Build'){
+  steps{
+  sh "mvn clean package"
+  }
+  }
+  
+  stage('ExcuteSonarQubeReport'){
+   steps{
+   sh "mvn clean sonar:sonar"
+   } 
+   }
+   
+   stage('UploadArtifactIntoNexus'){
+   steps{
+   sh "mvn clean deploy"
+   } 
+   } 
+   
+   stage('DeployAppIntoTomcat'){
+   steps{
+       sshagent(['6fd473bd-510f-43bb-8cf6-f6e54cedd5a2']) {
+  sh"scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@13.233.153.185:/opt/apache-tomcat-9.0.50/webapps/"
+   }
+   }
+   }
+   
+   
+  
+}//Stages Closing
+
+post{
+    	 	
+   success{
+   emailext body: '''regards
+sreedhar''', subject: 'Build Over', to: 'vijayvijay205@gmail.com'
+}
+
+   failure{
+   emailext body: '''regards
+sreedhar''', subject: 'Build Over', to: 'vijayvijay205@gmail.com'
+}
+}
+
+}//Pipeline closing

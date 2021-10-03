@@ -1,0 +1,33 @@
+
+    
+    def mavenHome = tool name: "Maven3.6.3"
+    stage("CheckOutCode"){
+        
+      git branch: 'development', credentialsId: 'GITHUB_CREDENTIALS', url: 'https://github.com/sreedhark9/maven-web-application.git'
+    }
+    
+    stage("Build"){
+        sh "${mavenHome}/bin/mvn clean package"
+    }
+    
+    stage("ExcuteSonarQubeReport"){
+        sh "${mavenHome}/bin/mvn sonar:sonar"
+    }
+   
+    stage("ExcuteSonarQubeReport"){
+        sh "${mavenHome}/bin/mvn deploy"
+    } 
+    
+    stage("DeployAPPintoTomcatServer"){
+        sshagent(['982bf065-f49c-4de2-89c2-9375cbb9facd']) {
+    sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@52.66.200.239:/opt/apache-tomcat-9.0.53/webapps"
+    }
+        
+    }
+    
+    stage("SendEmailNotification"){
+        emailext body: '''Build over...
+         Regards,
+       Sreedhar technoligies''', subject: 'Build over', to: 'siddukumark98@gmail.com'
+    }
+      

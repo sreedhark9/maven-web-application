@@ -1,4 +1,4 @@
-
+   node{
     
     def mavenHome = tool name: "Maven3.6.3"
     stage("CheckOutCode"){
@@ -30,4 +30,4 @@
          Regards,
        Sreedhar technoligies''', subject: 'Build over', to: 'siddukumark98@gmail.com'
     }
-      
+    }  
